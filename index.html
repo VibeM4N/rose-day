@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Happy Rose Day ❤️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            boxShadow: {
+              bloom: "0 0 45px rgba(244, 63, 94, 0.3)",
+            },
+            animation: {
+              "fade-in-up": "fadeInUp 1s ease forwards",
+            },
+            keyframes: {
+              fadeInUp: {
+                "0%": { opacity: "0", transform: "translateY(16px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        overflow: hidden;
+      }
+
+      .petal {
+        position: fixed;
+        top: -12vh;
+        width: clamp(22px, 2.6vw, 34px);
+        height: clamp(22px, 2.6vw, 34px);
+        object-fit: contain;
+        animation: fall linear forwards;
+        pointer-events: none;
+        user-select: none;
+        filter: drop-shadow(0 6px 8px rgba(190, 24, 93, 0.25));
+      }
+
+      @keyframes fall {
+        0% {
+          transform: translate3d(0, -10vh, 0) rotate(0deg) scale(0.95);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        100% {
+          transform: translate3d(var(--x-end), 110vh, 0) rotate(var(--spin))
+            scale(1.1);
+          opacity: 0;
+        }
+      }
+
+      .pulse-rose {
+        animation: rosePulse 3s ease-in-out infinite;
+      }
+
+      @keyframes rosePulse {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-7px);
+        }
+      }
+
+      @keyframes fadeInUp {
+        0% {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-seq {
+        opacity: 1;
+        animation: fadeInUp 0.9s ease forwards;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .fade-seq {
+          opacity: 0;
+        }
+      }
+      .glow-text {
+        text-shadow: 0 0 12px rgba(244, 63, 94, 0.6);
+      }
+
+      .heartbeat {
+        animation: heartbeat 1.2s ease-in-out infinite;
+      }
+
+      @keyframes heartbeat {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.04);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-red-100 text-rose-900 select-none"
+  >
+    <main
+      class="relative z-10 flex min-h-screen items-center justify-center px-6"
+    >
+      <section
+        class="max-w-2xl max-h-[90vh] overflow-auto rounded-3xl border border-rose-200/80 bg-white/75 p-8 text-center shadow-bloom backdrop-blur-md md:p-12"
+      >
+        <p
+          class="fade-seq mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-rose-500"
+          style="animation-delay: 0.1s"
+        >
+          Just for You 🌷
+        </p>
+        <h1
+          class="fade-seq pulse-rose text-4xl font-black leading-tight text-rose-700 md:text-6xl"
+          style="animation-delay: 0.3s"
+        >
+          Happy Rose Day, <span id="nameTarget">Shambhavi</span> 🌹
+        </h1>
+        <p
+          class="fade-seq mt-6 text-lg leading-relaxed text-rose-800 md:text-xl"
+          style="animation-delay: 0.55s"
+        >
+          Every rose here carries one reason why I adore you. your smile, your
+          warmth, your kindness, and the way you make every day feel magical.
+        </p>
+
+        <button
+          id="surpriseBtn"
+          class="fade-seq mt-8 rounded-full bg-rose-600 px-7 py-3 text-base font-semibold text-white shadow-lg transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-300"
+          style="animation-delay: 0.95s"
+          type="button"
+        >
+          Tap for a Surprise Secret ❤️
+        </button>
+
+        <div
+          id="surpriseBox"
+          class="mt-6 hidden rounded-xl bg-rose-50/70 p-4 text-center shadow-inner"
+        >
+          <p id="surpriseMsg" class="text-lg font-semibold text-rose-700"></p>
+        </div>
+      </section>
+    </main>
+
+    <audio id="bgMusic" preload="auto" loop playsinline>
+      <source src="DieWithASmile.mp3" type="audio/mpeg" />
+    </audio>
+    <script>
+      const bgMusic = document.getElementById("bgMusic");
+      let musicStarted = false;
+      const rosePNGs = [
+        "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f339.png", // 🌹
+        "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f33a.png", // 🌺
+        "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f338.png", // 🌸
+        "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f337.png", // 🌷
+      ];
+
+      function safeName(raw) {
+        if (!raw) return "Shambhavi";
+        const cleaned = raw.replace(/[^a-zA-Z\s'-]/g, "").trim();
+        return cleaned || "Shambhavi";
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const dynamicName = safeName(params.get("name") || "Shambhavi");
+      document.getElementById("nameTarget").textContent = dynamicName;
+
+      const surpriseMsg = document.getElementById("surpriseMsg");
+      surpriseMsg.textContent = `You are my forever favorite person, ${dynamicName}. 🌹✨`;
+
+      function createPetal() {
+        const rose = document.createElement("img");
+        rose.className = "petal";
+        rose.src = rosePNGs[Math.floor(Math.random() * rosePNGs.length)];
+        rose.alt = "falling rose";
+        rose.style.left = `${Math.random() * 100}vw`;
+        rose.style.animationDuration = `${6 + Math.random() * 7}s`;
+        rose.style.setProperty("--x-end", `${-20 + Math.random() * 40}vw`);
+        rose.style.setProperty("--spin", `${Math.random() * 560 - 280}deg`);
+        document.body.appendChild(rose);
+
+        setTimeout(() => {
+          rose.remove();
+        }, 14000);
+      }
+
+      setInterval(createPetal, 260);
+      for (let i = 0; i < 24; i += 1) {
+        setTimeout(createPetal, i * 140);
+      }
+
+      const surpriseBox = document.getElementById("surpriseBox");
+
+      let step = 0;
+
+      const messages = [
+        "I don’t need a thousand roses… I just need you.",
+        "We started dating on 17th July and at 11:11… I kissed you. A moment frozen in my heart forever.",
+        `Every rose blooms prettier when I think of you, ${dynamicName}. ❤️`,
+        "This page moves the way my heart does when I think of you.",
+        "This rose is yours 🌹",
+      ];
+
+      let typingInterval = null;
+      let isTyping = false;
+
+      function typeWriter(text, element, speed = 38) {
+        if (typingInterval) {
+          clearInterval(typingInterval);
+          typingInterval = null;
+        }
+
+        element.textContent = "";
+        let i = 0;
+        isTyping = true;
+
+        typingInterval = setInterval(() => {
+          element.textContent += text.charAt(i);
+          i++;
+
+          if (i >= text.length) {
+            clearInterval(typingInterval);
+            typingInterval = null;
+            isTyping = false;
+          }
+        }, speed);
+      }
+
+      surpriseBtn.addEventListener("click", () => {
+        if (bgMusic && !musicStarted) {
+          bgMusic.volume = 0;
+          bgMusic.play().catch(() => {});
+          console.log("Audio state:", bgMusic.paused, bgMusic.readyState);
+
+          musicStarted = true;
+
+          let vol = 0;
+          const fade = setInterval(() => {
+            vol += 0.05;
+            bgMusic.volume = Math.min(vol, 0.6);
+            if (vol >= 0.6) clearInterval(fade);
+          }, 120);
+        }
+        if (isTyping) {
+          clearInterval(typingInterval);
+          typingInterval = null;
+          isTyping = false;
+          surpriseMsg.textContent = messages[step];
+          return;
+        }
+
+        surpriseBox.classList.remove("hidden");
+        surpriseMsg.className = "text-lg font-semibold text-rose-700";
+
+        switch (step) {
+          case 0:
+            surpriseMsg.classList.add("glow-text", "text-xl");
+            typeWriter(
+              "I don’t need a thousand roses… I just need you.",
+              surpriseMsg,
+            );
+            surpriseBtn.textContent = "Tap again 💗";
+            break;
+
+          case 1:
+            surpriseMsg.classList.add("glow-text", "text-xl");
+            typeWriter(
+              "We started dating on 17th July and at 11:11… I kissed you. A moment frozen in my heart forever.",
+              surpriseMsg,
+            );
+            surpriseBtn.textContent = "One more ✨";
+            break;
+
+          case 2:
+            surpriseMsg.classList.add("glow-text", "text-xl");
+            typeWriter(
+              `Every rose blooms prettier when I think of you, ${dynamicName}. ❤️`,
+              surpriseMsg,
+            );
+            surpriseBtn.textContent = "Feel this ❤️";
+            break;
+
+          case 3:
+            surpriseMsg.classList.add("glow-text", "text-xl");
+            document.querySelector("section").classList.add("heartbeat");
+            typeWriter(
+              "This page moves the way my heart does when I think of you.",
+              surpriseMsg,
+            );
+            surpriseBtn.textContent = "Final surprise 🌹";
+            break;
+
+          case 4:
+            document.querySelector("section").classList.remove("heartbeat");
+            surpriseMsg.classList.add("glow-text", "text-xl");
+            typeWriter(
+              "This rose is yours, and so is my heart 🌹",
+              surpriseMsg,
+              50,
+            );
+            surpriseBtn.textContent = "I Love You Loads Sweetie 💖";
+            surpriseBtn.classList.add("text-2xl");
+            surpriseBtn.disabled = true;
+            surpriseBtn.classList.add("opacity-80", "cursor-default");
+            step = Infinity;
+            break;
+
+          default:
+            break;
+        }
+
+        step++;
+      });
+    </script>
+  </body>
+</html>
